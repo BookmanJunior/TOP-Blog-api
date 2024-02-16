@@ -31,6 +31,6 @@ app.use(
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
-app.use("/article", articleRouter);
+app.use("/articles", articleRouter);
 
 module.exports = app;
