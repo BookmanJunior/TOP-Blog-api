@@ -8,4 +8,6 @@ router.get("/:id", articleController.article_get);
 
 router.post("/new", articleController.article_post);
 
+router.put("/:id/edit", articleController.article_edit);
+
 module.exports = router;
