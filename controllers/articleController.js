@@ -1,11 +1,20 @@
 const Article = require("../models/Article");
 const { body, validationResult } = require("express-validator");
 
-exports.articles_get = async function (req, res, next) {
+async function getArticles(req, res, next) {
   try {
     const articles = await Article.find({})
       .sort({ featured: 1, date: 1 })
       .exec();
+    return articles;
+  } catch (error) {
+    return next(error);
+  }
+}
+
+exports.articles_get = async function (req, res, next) {
+  try {
+    const articles = await getArticles();
     return res.status(200).send(articles);
   } catch (error) {
     return next(error);
@@ -109,3 +118,13 @@ exports.article_edit = [
     }
   },
 ];
+
+exports.article_delete = async function (req, res, next) {
+  try {
+    await Article.findByIdAndDelete(req.params.id).exec();
+    const articles = await getArticles();
+    return res.status(200).send(articles);
+  } catch (error) {
+    return next(error);
+  }
+};
