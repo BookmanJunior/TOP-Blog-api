@@ -12,7 +12,6 @@ async function main() {
   mongoose.connect(process.env.DBURI);
 }
 
-const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const articleRouter = require("./routes/article");
 
@@ -29,7 +28,6 @@ app.use(
   })
 );
 
-app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/articles", articleRouter);
 
