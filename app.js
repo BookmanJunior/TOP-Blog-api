@@ -14,6 +14,7 @@ async function main() {
 
 const usersRouter = require("./routes/users");
 const articleRouter = require("./routes/article");
+const commentRouter = require("./routes/comment");
 
 var app = express();
 
@@ -30,5 +31,6 @@ app.use(
 
 app.use("/users", usersRouter);
 app.use("/articles", articleRouter);
+app.use("/comments", commentRouter);
 
 module.exports = app;
