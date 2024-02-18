@@ -4,6 +4,6 @@ const router = express.Router();
 
 router.post("/", commentController.comment_post);
 
-router.delete("/:commentId", commentController.comment_delete);
+router.delete("/:id", commentController.comment_delete);
 
 module.exports = router;

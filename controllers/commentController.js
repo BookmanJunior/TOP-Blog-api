@@ -49,7 +49,7 @@ exports.comment_post = [
 
 exports.comment_delete = async function (req, res, next) {
   const session = await mongoose.startSession();
-  const commentId = req.params.commentId;
+  const commentId = req.params.id;
   const articleId = req.body.articleId;
 
   try {
