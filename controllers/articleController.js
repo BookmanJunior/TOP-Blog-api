@@ -1,14 +1,27 @@
 const Article = require("../models/Article");
+const Comment = require("../models/Comment");
 const { body, validationResult } = require("express-validator");
+const mongoose = require("mongoose");
 
-async function getArticles(req, res, next) {
+const commentOptions = {
+  path: "comments",
+  select: "-article -__v",
+  options: { sort: { date: -1 } },
+  populate: {
+    path: "user",
+    select: "-_id username ",
+  },
+};
+
+async function getArticles() {
   try {
     const articles = await Article.find({})
       .sort({ featured: 1, date: 1 })
+      .populate([{ path: "author", select: "-_id username" }, commentOptions])
       .exec();
     return articles;
   } catch (error) {
-    return next(error);
+    throw new Error(error);
   }
 }
 
@@ -23,7 +36,10 @@ exports.articles_get = async function (req, res, next) {
 
 exports.article_get = async function (req, res, next) {
   try {
-    const article = await Article.findById(req.params.id).exec();
+    const article = await Article.findById(req.params.id)
+      .sort({ featured: 1, date: 1 })
+      .populate([{ path: "author", select: "-_id username" }, commentOptions])
+      .exec();
 
     if (!article) {
       return res.status(404).send("Article not found.");
@@ -120,11 +136,27 @@ exports.article_edit = [
 ];
 
 exports.article_delete = async function (req, res, next) {
+  const session = await mongoose.startSession();
   try {
-    await Article.findByIdAndDelete(req.params.id).exec();
+    session.startTransaction();
+    const article = await Article.findById(req.params.id)
+      .session(session)
+      .exec();
+
+    if (!article) {
+      await session.abortTransaction();
+      return res.status(404).send("Article not found");
+    }
+
+    await article.deleteOne({ session });
+    await Comment.deleteMany({ article: req.params.id }, { session });
+
+    await session.commitTransaction();
     const articles = await getArticles();
     return res.status(200).send(articles);
   } catch (error) {
     return next(error);
+  } finally {
+    session.endSession();
   }
 };
