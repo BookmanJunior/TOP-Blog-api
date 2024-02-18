@@ -1,4 +1,5 @@
 const { Schema, model } = require("mongoose");
+const Comment = require("./Comment");
 
 const ArticleSchema = new Schema({
   title: { type: String, required: true },
