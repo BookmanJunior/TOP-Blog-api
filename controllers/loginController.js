@@ -1,15 +1,15 @@
 const passport = require("passport");
 
 exports.login = (req, res, next) => {
-  passport.authenticate("local", (err, user) => {
+  passport.authenticate("local", (err, user, info) => {
     if (err) return next(err);
 
-    if (!user) return next("No user");
+    if (!user) return next(info.message);
 
     req.logIn(user, (err) => {
       if (err) return next(err);
 
-      return res.status(200).send("Logged In");
+      return res.status(200).send({ message: "Logged In" });
     });
   })(req, res, next);
 };
