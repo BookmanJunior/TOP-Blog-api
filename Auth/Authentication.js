@@ -11,7 +11,6 @@ const strategy = new LocalStrategy(async (username, password, done) => {
     }
 
     const isCorrectPassword = await user.validatePassword(password);
-    console.log(isCorrectPassword);
     if (!isCorrectPassword) {
       return done(null, false, { message: errorMessage });
     }
