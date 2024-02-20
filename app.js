@@ -33,7 +33,7 @@ app.use(logger("dev"));
 app.use(
   session({
     name: "blog",
-    secret: "placeholder",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
