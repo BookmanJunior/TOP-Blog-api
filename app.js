@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const passport = require("passport");
 const session = require("express-session");
 const strategy = require("./Auth/Authentication");
+const User = require("./models/User");
 require("dotenv").config();
 
 main().catch(() => console.log("Failed to connect to DB"));
@@ -58,7 +59,6 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await User.findById(id).exec();
-    console.log(`Deserialized user: ${user}`);
     done(null, user);
   } catch (err) {
     done(err);
