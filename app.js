@@ -5,9 +5,8 @@ const logger = require("morgan");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const passport = require("passport");
-const LocalStrategy = require("passport-local").Strategy;
 const session = require("express-session");
-const User = require("./models/User");
+const strategy = require("./Auth/Authentication");
 require("dotenv").config();
 
 main().catch(() => console.log("Failed to connect to DB"));
@@ -30,46 +29,27 @@ app.use(
   })
 );
 app.use(logger("dev"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(
   session({
     name: "blog",
-    secret: process.env.SESSION_SECRET,
+    secret: "test",
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 1 * 60 * 60 * 1000,
       httpOnly: true,
       secure: true,
       sameSite: "none",
     },
   })
 );
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
+passport.use(strategy);
 app.use(passport.initialize());
 app.use(passport.session());
-
-passport.use(
-  new LocalStrategy(async (username, password, done) => {
-    try {
-      const user = await User.findOne({ username }).exec();
-      if (!user) {
-        return done(null, false, { message: "Wrong username or password" });
-      }
-
-      const isCorrectPassword = await user.validatePassword(password);
-      if (!isCorrectPassword) {
-        return done(null, false, { message: "Wrong username or password" });
-      }
-
-      return done(null, user);
-    } catch (error) {
-      return done(error);
-    }
-  })
-);
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "public")));
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
