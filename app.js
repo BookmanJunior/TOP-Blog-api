@@ -22,6 +22,23 @@ const commentRouter = require("./routes/comment");
 const loginController = require("./routes/login");
 
 const app = express();
+const sessionOptions = {
+  name: "blog",
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: false,
+    sameSite: "strict",
+  },
+};
+
+if (process.env.NODE_ENV === "production") {
+  sessionOptions.cookie.secure = true;
+  sessionOptions.cookie.sameSite = "none";
+}
 
 app.use(
   cors({
@@ -32,20 +49,7 @@ app.use(
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(
-  session({
-    name: "blog",
-    secret: "test",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      maxAge: 1 * 60 * 60 * 1000,
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    },
-  })
-);
+app.use(session(sessionOptions));
 passport.use(strategy);
 app.use(passport.initialize());
 app.use(passport.session());
