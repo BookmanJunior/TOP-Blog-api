@@ -21,24 +21,30 @@ const { body, validationResult } = new ExpressValidator({
 });
 
 exports.user_post = [
-  body("username", "Username must be 4 characters long")
+  body("username", "Username must be at least 4 characters long")
     .trim()
     .isLength({ min: 4 })
+    .bail()
     .isUsernameTaken()
     .escape(),
-  body("password", "Password must be 8 characters long")
+  body("password", "Password must be at least 8 characters long")
     .trim()
     .isLength({ min: 8 })
     .escape(),
-  body("confirmPassword", "Confirm Password must be 8 characters long")
+  body("confirmPassword", "Confirm Password must be at least 8 characters long")
     .trim()
-    .isLength({ min: 8 })
     .isPasswordMatch()
+    .bail()
+    .isLength({ min: 8 })
     .escape(),
   body("name.*").optional({ checkFalsy: true }).trim().escape(),
 
   async function (req, res, next) {
-    const errors = validationResult(req);
+    const errorFormatter = ({ msg }) => {
+      return msg;
+    };
+
+    const errors = validationResult(req).formatWith(errorFormatter);
     const user = new User({
       username: req.body.username,
       password: req.body.password,
@@ -46,7 +52,7 @@ exports.user_post = [
     });
 
     if (!errors.isEmpty()) {
-      return res.status(422).send(errors.array());
+      return res.status(422).send(errors.mapped());
     }
 
     try {
