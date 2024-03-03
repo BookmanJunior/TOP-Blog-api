@@ -69,9 +69,31 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-app.use("/users", usersRouter);
+app.use((req, res, next) => {
+  res.locals.currentUser = req.user;
+  next();
+});
+
 app.use("/articles", articleRouter);
 app.use("/comments", commentRouter);
 app.use("/login", loginController);
+app.use("/sign-up", usersRouter);
+app.post("/auto-login", (req, res, next) => {
+  if (res.locals.currentUser) {
+    return res
+      .status(200)
+      .send({ user: { username: res.locals.currentUser.username } });
+  }
+
+  return res.sendStatus(400);
+});
+app.delete("/log-out", (req, res, next) => {
+  req.logOut((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.sendStatus(200);
+  });
+});
 
 module.exports = app;
