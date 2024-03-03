@@ -17,7 +17,7 @@ const strategy = new LocalStrategy(async (username, password, done) => {
 
     return done(null, user);
   } catch (error) {
-    return next(error);
+    return done(null, false);
   }
 });
 
