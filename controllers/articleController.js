@@ -42,7 +42,7 @@ exports.article_get = async function (req, res, next) {
       .exec();
 
     if (!article) {
-      return res.status(404).send("Article not found.");
+      return res.status(404).send({ message: "Article not found" });
     }
 
     return res.status(200).send(article);
