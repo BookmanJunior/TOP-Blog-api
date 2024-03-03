@@ -4,21 +4,12 @@ exports.login = (req, res, next) => {
   passport.authenticate("local", (err, user, info) => {
     if (err) return next(err);
 
-    if (!user) return next(info.message);
+    if (!user) return res.status(403).send({ credentials: info.message });
 
     req.logIn(user, (err) => {
       if (err) return next(err);
 
-      return res.status(200).send({ message: "Logged In" });
+      return res.status(200).send({ user: { username: user.username } });
     });
   })(req, res, next);
-};
-
-exports.logout = (req, res, next) => {
-  req.logOut((err) => {
-    if (err) {
-      return next(err);
-    }
-    res.status(200).send("Logged out");
-  });
 };
