@@ -4,19 +4,22 @@ const Comment = require("../models/Comment");
 const Article = require("../models/Article");
 
 exports.comment_post = [
-  body("text", "Comment can't be empty").trim().isLength({ min: 1 }),
+  body("comment", "Comment can't be empty").trim().isLength({ min: 1 }),
 
   async function (req, res, next) {
-    const errors = validationResult(req);
+    const errorFormatter = ({ msg }) => {
+      return msg;
+    };
+    const errors = validationResult(req).formatWith(errorFormatter);
 
     const comment = new Comment({
       text: req.body.comment,
       article: req.body.articleId,
-      user: req.body.user,
+      user: res.locals.currentUser,
     });
 
-    if (!errors.isEmpty) {
-      return res.status(400).send(errors.array());
+    if (!errors.isEmpty()) {
+      return res.status(400).send(errors.mapped());
     }
 
     const session = await mongoose.startSession();
@@ -28,7 +31,7 @@ exports.comment_post = [
 
       if (!article) {
         await session.abortTransaction();
-        return res.status(400).send("Article not found");
+        return res.status(404).send({ error: "Article not found" });
       }
 
       await comment.save({ session });
