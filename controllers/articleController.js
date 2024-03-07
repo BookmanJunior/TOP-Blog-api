@@ -27,7 +27,10 @@ async function getArticles() {
 
 exports.articles_get = async function (req, res, next) {
   try {
-    const articles = await getArticles();
+    const articles = await Article.find({})
+      .sort({ date: -1 })
+      .populate([{ path: "author", select: "-_id username" }, commentOptions])
+      .exec();
     return res.status(200).send(articles);
   } catch (error) {
     return next(error);
@@ -62,9 +65,7 @@ exports.article_post = [
       } catch (error) {
         throw new Error("Invalid Url. Try again.");
       }
-    })
-    .escape(),
-  body("author", "Author can't be empty").trim().isLength({ min: 1 }).escape(),
+    }),
   body("featured").trim().optional({ checkFalsy: true }).isBoolean().escape(),
   body("published").trim().optional({ checkFalsy: true }).isBoolean().escape(),
 
@@ -74,7 +75,7 @@ exports.article_post = [
       title: req.body.title,
       content: req.body.content,
       cover: req.body.cover,
-      author: req.body.author,
+      author: res.locals.currentUser,
       featured: req.body.featured,
       published: req.body.published,
     });
@@ -152,7 +153,10 @@ exports.article_delete = async function (req, res, next) {
     await Comment.deleteMany({ article: req.params.id }, { session });
 
     await session.commitTransaction();
-    const articles = await getArticles();
+    const articles = await Article.find({})
+      .sort({ date: -1 })
+      .populate([{ path: "author", select: "-_id username" }, commentOptions])
+      .exec();
     return res.status(200).send(articles);
   } catch (error) {
     return next(error);
