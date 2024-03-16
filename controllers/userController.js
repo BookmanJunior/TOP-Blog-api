@@ -20,6 +20,17 @@ const { body, validationResult } = new ExpressValidator({
   },
 });
 
+exports.users_get = async (req, res, next) => {
+  try {
+    const users = await User.find({}, "-password -__v")
+      .sort({ username: -1 })
+      .exec();
+    return res.status(200).send(users);
+  } catch (error) {
+    return next(error);
+  }
+};
+
 exports.user_post = [
   body("username", "Username must be at least 4 characters long")
     .trim()
