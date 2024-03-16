@@ -20,6 +20,7 @@ const usersRouter = require("./routes/users");
 const articleRouter = require("./routes/article");
 const commentRouter = require("./routes/comment");
 const loginController = require("./routes/login");
+const cmsController = require("./routes/cms");
 
 const app = express();
 const sessionOptions = {
@@ -78,6 +79,7 @@ app.use("/articles", articleRouter);
 app.use("/comments", commentRouter);
 app.use("/login", loginController);
 app.use("/sign-up", usersRouter);
+app.use("/cms", cmsController);
 app.post("/auto-login", (req, res, next) => {
   if (res.locals.currentUser) {
     return res.status(200).send({
