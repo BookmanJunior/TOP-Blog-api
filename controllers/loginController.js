@@ -9,7 +9,7 @@ exports.login = (req, res, next) => {
     req.logIn(user, (err) => {
       if (err) return next(err);
 
-      return res.status(200).send({ user: { username: user.username } });
+      return res.status(200).send({ username: user.username, role: user.role });
     });
   })(req, res, next);
 };

@@ -13,7 +13,7 @@ require("dotenv").config();
 main().catch(() => console.log("Failed to connect to DB"));
 
 async function main() {
-  mongoose.connect(process.env.DBURI);
+  await mongoose.connect(process.env.DBURI);
 }
 
 const usersRouter = require("./routes/users");
@@ -80,9 +80,10 @@ app.use("/login", loginController);
 app.use("/sign-up", usersRouter);
 app.post("/auto-login", (req, res, next) => {
   if (res.locals.currentUser) {
-    return res
-      .status(200)
-      .send({ user: { username: res.locals.currentUser.username } });
+    return res.status(200).send({
+      username: res.locals.currentUser.username,
+      role: res.locals.currentUser.role,
+    });
   }
 
   return res.sendStatus(400);
