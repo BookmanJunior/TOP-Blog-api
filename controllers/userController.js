@@ -31,6 +31,20 @@ exports.users_get = async (req, res, next) => {
   }
 };
 
+exports.user_get = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id, "-password").exec();
+
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
+    }
+
+    return res.status(200).send(user);
+  } catch (error) {
+    return next(error);
+  }
+};
+
 exports.user_post = [
   body("username", "Username must be at least 4 characters long")
     .trim()
