@@ -1,5 +1,6 @@
 const { ExpressValidator } = require("express-validator");
 const User = require("../models/User");
+const Role = require("../models/Role");
 
 const { body, validationResult } = new ExpressValidator({
   isUsernameTaken: async (value) => {
@@ -16,6 +17,13 @@ const { body, validationResult } = new ExpressValidator({
   isPasswordMatch: async (value, { req }) => {
     if (value !== req.body.password) {
       throw new Error("Passwords don't match");
+    }
+  },
+  isRole: async (value) => {
+    const role = Role.findOne({ role: value }).exec();
+
+    if (!role) {
+      throw new Error("Please pick an existing role");
     }
   },
 });
@@ -36,7 +44,7 @@ exports.user_get = async (req, res, next) => {
     const user = await User.findById(req.params.id, "-password").exec();
 
     if (!user) {
-      return res.status(404).send({ error: "User not found" });
+      return res.status(404).send({ message: "User not found" });
     }
 
     return res.status(200).send(user);
@@ -44,6 +52,37 @@ exports.user_get = async (req, res, next) => {
     return next(error);
   }
 };
+
+exports.user_update = [
+  body("username", "Username must be at least 4 characters long")
+    .trim()
+    .isLength({ min: 4 })
+    .bail()
+    .isUsernameTaken()
+    .escape(),
+  body("role", "Choose a user role").trim().isRole(),
+
+  async (req, res, next) => {
+    const update = {
+      username: req.body.username,
+      role: req.body.role,
+    };
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).send(errors.mapped());
+    }
+
+    try {
+      const updatedUser = await User.findByIdAndUpdate(req.params.id, update, {
+        new: true,
+      }).exec();
+      return res.status(200).send(updatedUser);
+    } catch (error) {
+      return next(error);
+    }
+  },
+];
 
 exports.user_post = [
   body("username", "Username must be at least 4 characters long")
