@@ -3,6 +3,7 @@ const loginController = require("../controllers/loginController");
 const authorizationController = require("../controllers/authorizationController");
 const userController = require("../controllers/userController");
 const cmsController = require("../controllers/cmsController");
+const articleController = require("../controllers/articleController");
 const Role = require("../models/Role");
 
 router.post("/login", loginController.login_cms);
