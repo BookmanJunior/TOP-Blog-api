@@ -104,8 +104,7 @@ exports.article_edit = [
       } catch (error) {
         throw new Error("Invalid Url. Try again.");
       }
-    })
-    .escape(),
+    }),
   body("author", "Author can't be empty").trim().isLength({ min: 1 }).escape(),
   body("featured").trim().optional({ checkFalsy: true }).isBoolean().escape(),
   body("published").trim().optional({ checkFalsy: true }).isBoolean().escape(),
@@ -113,13 +112,14 @@ exports.article_edit = [
   async function (req, res, next) {
     const errors = validationResult(req);
     const articleId = req.params.id;
-    const article = new Article({
+    const editedArticle = new Article({
       title: req.body.title,
       content: req.body.content,
       cover: req.body.cover,
       author: req.body.author,
       featured: req.body.featured,
       published: req.body.published,
+      date: req.body.date,
       _id: articleId,
     });
 
@@ -128,8 +128,12 @@ exports.article_edit = [
     }
 
     try {
-      await Article.findByIdAndUpdate(articleId, article);
-      return res.status(200).send(article);
+      const updatedArticle = await Article.findByIdAndUpdate(
+        req.params.id,
+        editedArticle
+      );
+
+      return res.status(200).send(updatedArticle);
     } catch (error) {
       return res.status(400).send(error);
     }
@@ -139,28 +143,17 @@ exports.article_edit = [
 exports.article_delete = async function (req, res, next) {
   const session = await mongoose.startSession();
   try {
-    session.startTransaction();
-    const article = await Article.findById(req.params.id)
-      .session(session)
-      .exec();
+    await session.withTransaction(async () => {
+      await Article.findByIdAndDelete(req.params.id).session(session).exec();
+      await Comment.deleteMany({ article: req.params.id })
+        .session(session)
+        .exec();
+    });
 
-    if (!article) {
-      await session.abortTransaction();
-      return res.status(404).send("Article not found");
-    }
-
-    await article.deleteOne({ session });
-    await Comment.deleteMany({ article: req.params.id }, { session });
-
-    await session.commitTransaction();
-    const articles = await Article.find({})
-      .sort({ date: -1 })
-      .populate([{ path: "author", select: "-_id username" }, commentOptions])
-      .exec();
-    return res.status(200).send(articles);
+    return res.status(200).send({ message: "Successfully deleted everything" });
   } catch (error) {
     return next(error);
   } finally {
-    session.endSession();
+    await session.endSession();
   }
 };
