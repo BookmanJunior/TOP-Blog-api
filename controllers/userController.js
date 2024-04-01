@@ -1,6 +1,8 @@
 const { ExpressValidator } = require("express-validator");
 const User = require("../models/User");
 const Role = require("../models/Role");
+const Comment = require("../models/Comment");
+const mongoose = require("mongoose");
 
 const { body, validationResult } = new ExpressValidator({
   isUsernameTaken: async (value) => {
@@ -128,3 +130,25 @@ exports.user_post = [
     }
   },
 ];
+
+exports.user_delete = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  try {
+    await session.withTransaction(async () => {
+      await User.findByIdAndDelete(req.params.id).session(session).exec();
+      await Comment.updateMany(
+        { user: req.params.id },
+        { $set: { deleted: true } }
+      )
+        .session(session)
+        .exec();
+    });
+
+    const updatedUsers = await User.find({}).exec();
+    return res.status(200).send(updatedUsers);
+  } catch (error) {
+    return next(error);
+  } finally {
+    await session.endSession();
+  }
+};
