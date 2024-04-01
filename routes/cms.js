@@ -16,6 +16,8 @@ router.put("/articles/:id/checkbox", articleController.article_checkbox_update);
 
 router.get("/users", authorizationController.isAdmin, userController.users_get);
 
+router.delete("/users/:id", userController.user_delete);
+
 router.get(
   "/users/:id",
   authorizationController.isAdmin,
