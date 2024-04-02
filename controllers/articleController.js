@@ -16,7 +16,7 @@ const commentOptions = {
 async function getArticles() {
   try {
     const articles = await Article.find({})
-      .sort({ featured: 1, date: 1 })
+      .sort({ featured: -1, date: -1 })
       .populate([{ path: "author", select: "-_id username" }, commentOptions])
       .exec();
     return articles;
@@ -140,6 +140,37 @@ exports.article_edit = [
   },
 ];
 
+exports.article_checkbox_update = [
+  body("featured").trim().optional({ checkFalsy: true }).isBoolean().escape(),
+  body("published").trim().optional({ checkFalsy: true }).isBoolean().escape(),
+
+  async (req, res, next) => {
+    try {
+      if (req.body.featured) {
+        await Article.findOneAndUpdate(
+          { featured: true },
+          { $set: { featured: false } }
+        );
+        await Article.findByIdAndUpdate(req.params.id, {
+          $set: { featured: true },
+        });
+      } else {
+        await Article.findByIdAndUpdate(req.params.id, {
+          $set: { published: req.body.published, featured: req.body.featured },
+        });
+      }
+
+      const updatedArticles = await Article.find({})
+        .populate([{ path: "author", select: "username" }])
+        .sort("date: -1")
+        .exec();
+      return res.status(200).send(updatedArticles);
+    } catch (error) {
+      return next(error);
+    }
+  },
+];
+
 exports.article_delete = async function (req, res, next) {
   const session = await mongoose.startSession();
   try {
@@ -149,8 +180,8 @@ exports.article_delete = async function (req, res, next) {
         .session(session)
         .exec();
     });
-
-    return res.status(200).send({ message: "Successfully deleted everything" });
+    const articles = await getArticles();
+    return res.status(200).send(articles);
   } catch (error) {
     return next(error);
   } finally {
