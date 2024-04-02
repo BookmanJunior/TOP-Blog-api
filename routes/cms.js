@@ -33,18 +33,7 @@ router.put(
 
 router.post("/users", UserValidation, userController.user_cms_post);
 
-router.get(
-  "/roles",
-  authorizationController.isAdmin,
-  async (req, res, next) => {
-    try {
-      const roles = await Role.find({}).exec();
-      return res.status(200).send(roles);
-    } catch (error) {
-      return next(error);
-    }
-  }
-);
+router.get("/roles", authorizationController.isAdmin, cmsController.roles_get);
 
 router.get("/count", cmsController.documents_count_get);
 
