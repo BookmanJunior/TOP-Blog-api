@@ -86,6 +86,32 @@ exports.user_post = async function (req, res, next) {
   }
 };
 
+exports.user_cms_post = async function (req, res, next) {
+  const errorFormatter = ({ msg }) => {
+    return msg;
+  };
+
+  const errors = validationResult(req).formatWith(errorFormatter);
+  const user = new User({
+    username: req.body.username,
+    password: req.body.password,
+    name: req.body.name,
+    role: req.body.role,
+  });
+
+  if (!errors.isEmpty()) {
+    return res.status(422).send(errors.mapped());
+  }
+
+  try {
+    user.password = await user.encryptPassword();
+    await user.save();
+    return res.status(200).send(user);
+  } catch (error) {
+    return res.status(400).send(error);
+  }
+};
+
 exports.user_delete = async (req, res, next) => {
   const session = await mongoose.startSession();
   try {
