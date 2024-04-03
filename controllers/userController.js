@@ -2,6 +2,7 @@ const { ExpressValidator } = require("express-validator");
 const User = require("../models/User");
 const Role = require("../models/Role");
 const Comment = require("../models/Comment");
+const Article = require("../models/Article");
 const mongoose = require("mongoose");
 const { body, validationResult } = require("../validators/CustomValidator");
 
@@ -131,5 +132,52 @@ exports.user_delete = async (req, res, next) => {
     return next(error);
   } finally {
     await session.endSession();
+  }
+};
+
+exports.bookmark_post = async (req, res, next) => {
+  try {
+    const isArticle = await Article.findById(req.params.articleId);
+
+    if (!isArticle) {
+      return res.status(404).send({ message: "Article not found" });
+    }
+
+    const currentUser = await User.findById(res.locals.currentUser.id);
+
+    console.log(currentUser.bookmarks);
+
+    if (currentUser.bookmarks.includes(isArticle.id)) {
+      return res
+        .status(400)
+        .send({ message: `${isArticle.title} is already bookmarked` });
+    }
+
+    await User.findByIdAndUpdate(res.locals.currentUser.id, {
+      $push: { bookmarks: isArticle.id },
+    });
+
+    return res.status(200).send({ message: `Bookmarked ${isArticle.title}` });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.bookmark_delete = async (req, res, next) => {
+  try {
+    const isArticle = await Article.findById(req.params.articleId);
+
+    if (!isArticle) {
+      return res.status(404).send({ message: "Article not found" });
+    }
+    await User.findByIdAndUpdate(res.locals.currentUser.id, {
+      $pull: { bookmarks: isArticle.id },
+    });
+
+    return res
+      .status(200)
+      .send({ message: `Removed ${isArticle.title} from bookmarks` });
+  } catch (error) {
+    return next(error);
   }
 };
