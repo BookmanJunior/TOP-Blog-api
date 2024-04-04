@@ -29,7 +29,7 @@ exports.articles_get = async function (req, res, next) {
   try {
     const articles = await Article.find({})
       .sort({ date: -1 })
-      .populate([{ path: "author", select: "-_id username" }, commentOptions])
+      .populate([{ path: "author", select: "-_id username" }])
       .exec();
     return res.status(200).send(articles);
   } catch (error) {
