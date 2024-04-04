@@ -5,6 +5,7 @@ const UserSchema = new Schema({
   username: { type: String, required: true },
   password: { type: String, required: true },
   name: { first: String, last: String },
+  bookmarks: [{ type: Schema.Types.ObjectId, ref: "Article" }],
   createdAt: { type: Date, default: Date.now },
   role: { type: String, default: "user", required: true },
 });
