@@ -9,7 +9,8 @@ exports.login = (req, res, next) => {
     req.logIn(user, (err) => {
       if (err) return next(err);
 
-      return res.status(200).send({ username: user.username, role: user.role });
+      res.locals.currentUser = user;
+      next();
     });
   })(req, res, next);
 };
@@ -26,7 +27,8 @@ exports.login_cms = (req, res, next) => {
     req.logIn(user, (err) => {
       if (err) return next(err);
 
-      return res.status(200).send({ username: user.username, role: user.role });
+      res.locals.currentUser = user;
+      next();
     });
   })(req, res, next);
 };
