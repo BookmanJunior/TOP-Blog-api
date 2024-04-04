@@ -7,7 +7,7 @@ const articleController = require("../controllers/articleController");
 const Role = require("../models/Role");
 const { UserValidation } = require("../validators/UserValidation");
 
-router.post("/login", loginController.login_cms);
+router.post("/login", loginController.login_cms, userController.me);
 
 router.delete("/articles/:id", articleController.article_delete);
 
