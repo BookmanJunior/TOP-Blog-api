@@ -135,17 +135,38 @@ exports.user_delete = async (req, res, next) => {
   }
 };
 
+const BookmarkPopulateOptions = {
+  path: "bookmarks",
+  populate: { path: "author", select: "-_id username" },
+};
+
+exports.me = async (req, res, next) => {
+  const user = res.locals.currentUser;
+
+  if (!user) {
+    return res.sendStatus(400);
+  }
+
+  const populatedUser = await user.populate(BookmarkPopulateOptions);
+
+  try {
+    return res.status(200).send({
+      username: populatedUser.username,
+      bookmarks: populatedUser.bookmarks,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 exports.bookmark_post = async (req, res, next) => {
   try {
     const isArticle = await Article.findById(req.params.articleId);
+    const { currentUser } = res.locals;
 
     if (!isArticle) {
       return res.status(404).send({ message: "Article not found" });
     }
-
-    const currentUser = await User.findById(res.locals.currentUser.id);
-
-    console.log(currentUser.bookmarks);
 
     if (currentUser.bookmarks.includes(isArticle.id)) {
       return res
@@ -153,11 +174,15 @@ exports.bookmark_post = async (req, res, next) => {
         .send({ message: `${isArticle.title} is already bookmarked` });
     }
 
-    await User.findByIdAndUpdate(res.locals.currentUser.id, {
-      $push: { bookmarks: isArticle.id },
-    });
+    const updatedUser = await User.findByIdAndUpdate(
+      currentUser.id,
+      { $push: { bookmarks: isArticle.id } },
+      { new: true }
+    )
+      .populate(BookmarkPopulateOptions)
+      .exec();
 
-    return res.status(200).send({ message: `Bookmarked ${isArticle.title}` });
+    return res.status(200).send(updatedUser.bookmarks);
   } catch (error) {
     return next(error);
   }
@@ -166,17 +191,22 @@ exports.bookmark_post = async (req, res, next) => {
 exports.bookmark_delete = async (req, res, next) => {
   try {
     const isArticle = await Article.findById(req.params.articleId);
+    const { currentUser } = res.locals;
 
     if (!isArticle) {
       return res.status(404).send({ message: "Article not found" });
     }
-    await User.findByIdAndUpdate(res.locals.currentUser.id, {
-      $pull: { bookmarks: isArticle.id },
-    });
+    const updatedUser = await User.findByIdAndUpdate(
+      currentUser.id,
+      {
+        $pull: { bookmarks: isArticle.id },
+      },
+      { new: true }
+    )
+      .populate(BookmarkPopulateOptions)
+      .exec();
 
-    return res
-      .status(200)
-      .send({ message: `Removed ${isArticle.title} from bookmarks` });
+    return res.status(200).send(updatedUser.bookmarks);
   } catch (error) {
     return next(error);
   }
