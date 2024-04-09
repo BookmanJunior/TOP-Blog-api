@@ -10,6 +10,7 @@ const strategy = require("./Auth/Authentication");
 const User = require("./models/User");
 const UserController = require("./controllers/userController");
 const authorizationController = require("./controllers/authorizationController");
+const loginMiddlewares = require("./controllers/loginController");
 require("dotenv").config();
 
 main().catch(() => console.log("Failed to connect to DB"));
@@ -82,16 +83,10 @@ app.use("/articles", articleRouter);
 app.use("/comments", commentRouter);
 app.use("/login", loginController);
 app.use("/sign-up", usersRouter);
+app.post("/admin/login", loginMiddlewares.login_cms, UserController.me);
 app.use("/cms", authorizationController.isAdmin, cmsController);
 app.use("/me", userController);
 app.post("/auto-login", UserController.me);
-app.delete("/log-out", (req, res, next) => {
-  req.logOut((err) => {
-    if (err) {
-      return next(err);
-    }
-    res.sendStatus(200);
-  });
-});
+app.delete("/log-out", loginMiddlewares.logout);
 
 module.exports = app;
