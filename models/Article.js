@@ -9,7 +9,7 @@ const ArticleSchema = new Schema({
   comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
   featured: { type: Boolean, default: false },
   published: { type: Boolean, default: true },
-  date: { type: Date, default: Date.now() },
+  date: { type: Date, default: Date.now },
 });
 
 module.exports = model("Article", ArticleSchema);

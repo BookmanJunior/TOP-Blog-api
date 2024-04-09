@@ -5,7 +5,7 @@ const CommentSchema = new Schema({
   user: { type: Schema.Types.ObjectId, ref: "User", required: true },
   article: { type: Schema.Types.ObjectId, ref: "Article", required: true },
   deleted: { type: Boolean, default: false },
-  date: { type: Date, default: Date.now() },
+  date: { type: Date, default: Date.now },
 });
 
 module.exports = model("Comment", CommentSchema);
