@@ -8,6 +8,8 @@ const passport = require("passport");
 const session = require("express-session");
 const strategy = require("./Auth/Authentication");
 const User = require("./models/User");
+const UserController = require("./controllers/userController");
+const authorizationController = require("./controllers/authorizationController");
 require("dotenv").config();
 
 main().catch(() => console.log("Failed to connect to DB"));
@@ -21,6 +23,7 @@ const articleRouter = require("./routes/article");
 const commentRouter = require("./routes/comment");
 const loginController = require("./routes/login");
 const cmsController = require("./routes/cms");
+const userController = require("./routes/user");
 
 const app = express();
 const sessionOptions = {
@@ -63,7 +66,7 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await User.findById(id).exec();
+    const user = await User.findById(id, "username bookmarks role").exec();
     done(null, user);
   } catch (err) {
     done(err);
@@ -79,17 +82,9 @@ app.use("/articles", articleRouter);
 app.use("/comments", commentRouter);
 app.use("/login", loginController);
 app.use("/sign-up", usersRouter);
-app.use("/cms", cmsController);
-app.post("/auto-login", (req, res, next) => {
-  if (res.locals.currentUser) {
-    return res.status(200).send({
-      username: res.locals.currentUser.username,
-      role: res.locals.currentUser.role,
-    });
-  }
-
-  return res.sendStatus(400);
-});
+app.use("/cms", authorizationController.isAdmin, cmsController);
+app.use("/me", userController);
+app.post("/auto-login", UserController.me);
 app.delete("/log-out", (req, res, next) => {
   req.logOut((err) => {
     if (err) {
