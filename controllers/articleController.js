@@ -13,11 +13,15 @@ const commentOptions = {
   },
 };
 
+const articleSortOption = {
+  date: -1,
+};
+
 async function getArticles() {
   try {
     const articles = await Article.find({})
-      .sort({ featured: -1, date: -1 })
-      .populate([{ path: "author", select: "-_id username" }, commentOptions])
+      .sort(articleSortOption)
+      .populate([{ path: "author", select: "username" }])
       .exec();
     return articles;
   } catch (error) {
@@ -27,10 +31,7 @@ async function getArticles() {
 
 exports.articles_get = async function (req, res, next) {
   try {
-    const articles = await Article.find({})
-      .sort({ date: -1 })
-      .populate([{ path: "author", select: "-_id username" }])
-      .exec();
+    const articles = await getArticles();
     return res.status(200).send(articles);
   } catch (error) {
     return next(error);
@@ -39,9 +40,12 @@ exports.articles_get = async function (req, res, next) {
 
 exports.article_get = async function (req, res, next) {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).send({ message: "Article not found" });
+    }
+
     const article = await Article.findById(req.params.id)
-      .sort({ featured: 1, date: 1 })
-      .populate([{ path: "author", select: "-_id username" }, commentOptions])
+      .populate([{ path: "author", select: "username" }, commentOptions])
       .exec();
 
     if (!article) {
@@ -162,7 +166,7 @@ exports.article_checkbox_update = [
 
       const updatedArticles = await Article.find({})
         .populate([{ path: "author", select: "username" }])
-        .sort("date: -1")
+        .sort(articleSortOption)
         .exec();
       return res.status(200).send(updatedArticles);
     } catch (error) {
