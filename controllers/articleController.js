@@ -104,6 +104,7 @@ exports.article_post = [
 
 exports.article_edit = [
   articleValidation,
+  body("comments.*._id", "Invalid Comment ID").isMongoId(),
 
   async function (req, res, next) {
     const errors = validationResult(req);
@@ -113,6 +114,7 @@ exports.article_edit = [
       content: req.body.content,
       cover: req.body.cover,
       author: req.body.author,
+      comments: req.body.comments,
       featured: req.body.featured,
       published: req.body.published,
       date: req.body.date,
