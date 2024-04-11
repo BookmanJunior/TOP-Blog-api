@@ -4,7 +4,7 @@ exports.login = (req, res, next) => {
   passport.authenticate("local", (err, user, info) => {
     if (err) return next(err);
 
-    if (!user) return res.status(403).send({ credentials: info.message });
+    if (!user) return res.status(403).send({ message: info.message });
 
     req.logIn(user, (err) => {
       if (err) return next(err);
@@ -19,10 +19,10 @@ exports.login_cms = (req, res, next) => {
   passport.authenticate("local", (err, user, info) => {
     if (err) return next(err);
 
-    if (!user) return res.status(403).send({ credentials: info.message });
+    if (!user) return res.status(403).send({ message: info.message });
 
     if (user.role !== "admin")
-      return res.status(403).send({ error: "Unauthorized" });
+      return res.status(403).send({ message: "Unauthorized" });
 
     req.logIn(user, (err) => {
       if (err) return next(err);
