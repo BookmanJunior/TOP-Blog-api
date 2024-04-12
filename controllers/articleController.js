@@ -79,7 +79,7 @@ exports.article_post = [
   articleValidation,
 
   async function (req, res, next) {
-    const errors = validationResult(req);
+    const errors = validationResult(req).formatWith(ErrorFormatter);
     const article = new Article({
       title: req.body.title,
       content: req.body.content,
@@ -90,7 +90,7 @@ exports.article_post = [
     });
 
     if (!errors.isEmpty()) {
-      return res.status(422).send(errors);
+      return res.status(422).send(errors.mapped());
     }
 
     try {
@@ -107,7 +107,7 @@ exports.article_edit = [
   body("comments.*._id", "Invalid Comment ID").isMongoId(),
 
   async function (req, res, next) {
-    const errors = validationResult(req);
+    const errors = validationResult(req).formatWith(ErrorFormatter);
     const articleId = req.params.id;
     const editedArticle = new Article({
       title: req.body.title,
@@ -122,7 +122,7 @@ exports.article_edit = [
     });
 
     if (!errors.isEmpty()) {
-      return res.status(422).send(errors);
+      return res.status(422).send(errors.mapped());
     }
 
     try {
