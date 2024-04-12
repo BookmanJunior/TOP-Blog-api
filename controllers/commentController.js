@@ -57,15 +57,24 @@ exports.comment_post = [
 ];
 
 exports.comment_delete = async function (req, res, next) {
+  const { currentUser } = res.locals;
+
   if (!mongoose.isValidObjectId(req.params.id)) {
     return res.status(404).send({ message: "Comment not found" });
   }
 
   try {
-    await Comment.findByIdAndUpdate(req.params.id, {
-      $set: { deleted: true },
-    }).exec();
-    res.status(200).send("Deleted comment");
+    const comment = await Comment.findById(req.params.id).exec();
+
+    if (
+      comment.user.toString() === currentUser.id ||
+      currentUser.role === "admin"
+    ) {
+      await comment.updateOne({ $set: { deleted: true } });
+      return res.status(200).send({ message: "Deleted comment" });
+    }
+
+    return res.status(403).send({ message: "Unauthorized" });
   } catch (error) {
     return next(error);
   }
