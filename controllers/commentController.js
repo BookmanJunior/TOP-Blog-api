@@ -4,7 +4,10 @@ const Comment = require("../models/Comment");
 const Article = require("../models/Article");
 
 exports.comment_post = [
-  body("comment", "Comment can't be empty").trim().isLength({ min: 1 }),
+  body("comment", "Comment can't be empty")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
 
   async function (req, res, next) {
     const errorFormatter = ({ msg }) => {
@@ -24,28 +27,31 @@ exports.comment_post = [
 
     const session = await mongoose.startSession();
     try {
-      session.startTransaction();
-      const article = await Article.findById(req.body.articleId)
-        .session(session)
-        .exec();
+      await session.withTransaction(async () => {
+        const article = await Article.findById(req.body.articleId)
+          .session(session)
+          .exec();
 
-      if (!article) {
-        await session.abortTransaction();
-        return res.status(404).send({ error: "Article not found" });
-      }
+        if (!article) {
+          await session.abortTransaction();
+          const error = new Error("Article not found");
+          error.status = 404;
+          return next(error);
+        }
 
-      await comment.save({ session });
-      await article.updateOne(
-        { $push: { comments: comment._id } },
-        { session }
-      );
-
-      await session.commitTransaction();
+        await comment.save({ session: session });
+        await article.updateOne(
+          {
+            $push: { comments: comment._id },
+          },
+          { session: session }
+        );
+      });
       return res.status(200).send(comment);
     } catch (error) {
       return next(error);
     } finally {
-      session.endSession();
+      await session.endSession();
     }
   },
 ];
