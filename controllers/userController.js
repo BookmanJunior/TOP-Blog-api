@@ -152,6 +152,8 @@ exports.me = async (req, res, next) => {
   try {
     return res.status(200).send({
       username: populatedUser.username,
+      _id: populatedUser._id,
+      role: populatedUser.role,
       bookmarks: populatedUser.bookmarks,
     });
   } catch (error) {
