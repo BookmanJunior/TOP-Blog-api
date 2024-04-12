@@ -57,34 +57,16 @@ exports.comment_post = [
 ];
 
 exports.comment_delete = async function (req, res, next) {
-  const session = await mongoose.startSession();
-  const commentId = req.params.id;
-  const articleId = req.body.articleId;
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return res.status(404).send({ message: "Comment not found" });
+  }
 
   try {
-    session.startTransaction();
-
-    const comment = await Comment.findById(commentId).session(session).exec();
-
-    if (!comment) {
-      await session.abortTransaction();
-      return res.status(404).send("Comment not found");
-    }
-
-    await comment.deleteOne({ session });
-    await Article.findByIdAndUpdate(
-      articleId,
-      {
-        $pull: { comments: commentId },
-      },
-      { session }
-    ).exec();
-
-    await session.commitTransaction();
+    await Comment.findByIdAndUpdate(req.params.id, {
+      $set: { deleted: true },
+    }).exec();
     res.status(200).send("Deleted comment");
   } catch (error) {
     return next(error);
-  } finally {
-    session.endSession();
   }
 };
