@@ -10,7 +10,7 @@ const commentOptions = {
   options: { sort: { date: -1 } },
   populate: {
     path: "user",
-    select: "-_id username ",
+    select: "username",
   },
 };
 
