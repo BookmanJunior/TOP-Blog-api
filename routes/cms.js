@@ -4,6 +4,10 @@ const cmsController = require("../controllers/cmsController");
 const articleController = require("../controllers/articleController");
 const { UserValidation } = require("../validators/UserValidation");
 
+router.get("/articles", articleController.articles_get);
+
+router.post("/articles", articleController.article_post);
+
 router.delete("/articles/:id", articleController.article_delete);
 
 router.put("/articles/:id", articleController.article_edit);
