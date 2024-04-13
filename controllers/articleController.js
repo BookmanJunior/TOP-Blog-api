@@ -18,6 +18,8 @@ const articleSortOption = {
   date: -1,
 };
 
+const articleAuthorOptions = { path: "author", select: "username" };
+
 const articleValidation = [
   body("title", "Title can't be blank").trim().isLength({ min: 1 }),
   body("content", "Article content can't be blank").trim().isLength({ min: 1 }),
@@ -38,13 +40,25 @@ async function getArticles() {
   try {
     const articles = await Article.find({})
       .sort(articleSortOption)
-      .populate([{ path: "author", select: "username" }])
+      .populate([articleAuthorOptions])
       .exec();
     return articles;
   } catch (error) {
     throw new Error(error);
   }
 }
+
+exports.published_articles_get = async function (req, res, next) {
+  try {
+    const articles = await Article.find({ published: true })
+      .sort(articleSortOption)
+      .populate([articleAuthorOptions])
+      .exec();
+    return res.status(200).send(articles);
+  } catch (error) {
+    next(error);
+  }
+};
 
 exports.articles_get = async function (req, res, next) {
   try {
@@ -62,7 +76,7 @@ exports.article_get = async function (req, res, next) {
     }
 
     const article = await Article.findById(req.params.id)
-      .populate([{ path: "author", select: "username" }, commentOptions])
+      .populate([articleAuthorOptions, commentOptions])
       .exec();
 
     if (!article) {
@@ -159,7 +173,7 @@ exports.article_checkbox_update = [
       }
 
       const updatedArticles = await Article.find({})
-        .populate([{ path: "author", select: "username" }])
+        .populate([articleAuthorOptions])
         .sort(articleSortOption)
         .exec();
       return res.status(200).send(updatedArticles);
