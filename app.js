@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const passport = require("passport");
 const session = require("express-session");
 const strategy = require("./Auth/Authentication");
+const helmet = require("helmet");
 const User = require("./models/User");
 const UserController = require("./controllers/userController");
 const authorizationController = require("./controllers/authorizationController");
@@ -45,6 +46,7 @@ if (process.env.NODE_ENV === "production") {
   sessionOptions.cookie.sameSite = "none";
 }
 
+app.use(helmet());
 app.use(
   cors({
     origin: "http://localhost:5173",
