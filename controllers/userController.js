@@ -5,6 +5,7 @@ const Comment = require("../models/Comment");
 const Article = require("../models/Article");
 const mongoose = require("mongoose");
 const { body, validationResult } = require("../validators/CustomValidator");
+const { ErrorFormatter } = require("../helpers/ErrorFormatter");
 
 exports.users_get = async (req, res, next) => {
   try {
@@ -63,11 +64,7 @@ exports.user_update = [
 ];
 
 exports.user_post = async function (req, res, next) {
-  const errorFormatter = ({ msg }) => {
-    return msg;
-  };
-
-  const errors = validationResult(req).formatWith(errorFormatter);
+  const errors = validationResult(req).formatWith(ErrorFormatter);
   const user = new User({
     username: req.body.username,
     password: req.body.password,
@@ -88,11 +85,7 @@ exports.user_post = async function (req, res, next) {
 };
 
 exports.user_cms_post = async function (req, res, next) {
-  const errorFormatter = ({ msg }) => {
-    return msg;
-  };
-
-  const errors = validationResult(req).formatWith(errorFormatter);
+  const errors = validationResult(req).formatWith(ErrorFormatter);
   const user = new User({
     username: req.body.username,
     password: req.body.password,
