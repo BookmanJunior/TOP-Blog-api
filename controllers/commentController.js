@@ -70,7 +70,7 @@ exports.comment_delete = async function (req, res, next) {
       comment.user.toString() === currentUser.id ||
       currentUser.role === "admin"
     ) {
-      await comment.updateOne({ $set: { deleted: true } });
+      await comment.updateOne({ $set: { deleted: true, text: "" } });
       return res.status(200).send({ message: "Deleted comment" });
     }
 
