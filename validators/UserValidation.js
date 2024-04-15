@@ -1,6 +1,6 @@
 const { body } = require("./CustomValidator");
 
-exports.UserValidation = [
+exports.UserValidation = () => [
   body("username", "Username must be at least 4 characters long")
     .trim()
     .isLength({ min: 4 })
