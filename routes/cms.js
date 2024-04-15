@@ -3,14 +3,19 @@ const userController = require("../controllers/userController");
 const cmsController = require("../controllers/cmsController");
 const articleController = require("../controllers/articleController");
 const { UserValidation } = require("../validators/UserValidation");
+const { ArticleValidation } = require("../validators/ArticleValidation");
 
 router.get("/articles", articleController.articles_get);
 
-router.post("/articles", articleController.article_post);
+router.post("/articles", ArticleValidation(), articleController.article_post);
+
+router.put(
+  "/articles/:id",
+  ArticleValidation(),
+  articleController.article_edit
+);
 
 router.delete("/articles/:id", articleController.article_delete);
-
-router.put("/articles/:id", articleController.article_edit);
 
 router.put("/articles/:id/checkbox", articleController.article_checkbox_update);
 
