@@ -20,21 +20,16 @@ const articleSortOption = {
 
 const articleAuthorOptions = { path: "author", select: "username" };
 
-const articleValidation = [
-  body("title", "Title can't be blank").trim().isLength({ min: 1 }),
-  body("content", "Article content can't be blank").trim().isLength({ min: 1 }),
-  body("cover", "Article cover can't be empty")
-    .trim()
-    .custom(async (value) => {
-      try {
-        new URL(value);
-      } catch (error) {
-        throw new Error("Invalid Url. Try again.");
-      }
-    }),
-  body("featured").trim().optional({ checkFalsy: true }).isBoolean().escape(),
-  body("published").trim().optional({ checkFalsy: true }).isBoolean().escape(),
-];
+// const articleValidation = [
+//   body("title", "Title can't be blank").trim().isLength({ min: 1 }),
+//   body("content", "Article content can't be blank").trim().isLength({ min: 1 }),
+//   body("cover", "Article cover can't be empty")
+//     .trim()
+//     .isURL()
+//     .withMessage("Invalid cover Url"),
+//   body("featured").trim().optional({ checkFalsy: true }).isBoolean().escape(),
+//   body("published").trim().optional({ checkFalsy: true }).isBoolean().escape(),
+// ];
 
 async function getArticles() {
   try {
@@ -89,35 +84,30 @@ exports.article_get = async function (req, res, next) {
   }
 };
 
-exports.article_post = [
-  articleValidation,
+exports.article_post = async function (req, res, next) {
+  const errors = validationResult(req).formatWith(ErrorFormatter);
+  const article = new Article({
+    title: req.body.title,
+    content: req.body.content,
+    cover: req.body.cover,
+    author: res.locals.currentUser,
+    featured: req.body.featured,
+    published: req.body.published,
+  });
 
-  async function (req, res, next) {
-    const errors = validationResult(req).formatWith(ErrorFormatter);
-    const article = new Article({
-      title: req.body.title,
-      content: req.body.content,
-      cover: req.body.cover,
-      author: res.locals.currentUser,
-      featured: req.body.featured,
-      published: req.body.published,
-    });
+  if (!errors.isEmpty()) {
+    return res.status(422).send(errors.mapped());
+  }
 
-    if (!errors.isEmpty()) {
-      return res.status(422).send(errors.mapped());
-    }
-
-    try {
-      await article.save();
-      return res.status(200).send(article);
-    } catch (error) {
-      return res.status(400).send(error);
-    }
-  },
-];
+  try {
+    await article.save();
+    return res.status(200).send(article);
+  } catch (error) {
+    return res.status(400).send(error);
+  }
+};
 
 exports.article_edit = [
-  articleValidation,
   body("comments.*._id", "Invalid Comment ID").isMongoId(),
 
   async function (req, res, next) {
