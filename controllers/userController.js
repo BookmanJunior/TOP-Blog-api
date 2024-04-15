@@ -78,7 +78,7 @@ exports.user_post = async function (req, res, next) {
   try {
     user.password = await user.encryptPassword();
     await user.save();
-    return res.status(200).send(user);
+    return next();
   } catch (error) {
     return res.status(400).send(error);
   }
