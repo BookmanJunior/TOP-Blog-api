@@ -27,7 +27,7 @@ router.get("/users/:id", userController.user_get);
 
 router.put("/users/:id", userController.user_update);
 
-router.post("/users", UserValidation, userController.user_cms_post);
+router.post("/users", UserValidation(), userController.user_cms_post);
 
 router.get("/roles", cmsController.roles_get);
 
