@@ -19,11 +19,17 @@ exports.users_get = async (req, res, next) => {
 };
 
 exports.user_get = async (req, res, next) => {
+  const errorMsg = { message: "User not found" };
+
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).send(errorMsg);
+    }
+
     const user = await User.findById(req.params.id, "-password").exec();
 
     if (!user) {
-      return res.status(404).send({ message: "User not found" });
+      return res.status(404).send(errorMsg);
     }
 
     return res.status(200).send(user);
