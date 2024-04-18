@@ -7,6 +7,7 @@ const ArticleSchema = new Schema({
   cover: { type: String },
   author: { type: Schema.Types.ObjectId, ref: "User", required: true },
   comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+  category: { type: Schema.Types.ObjectId, ref: "Category", required: true },
   featured: { type: Boolean, default: false },
   published: { type: Boolean, default: true },
   date: { type: Date, default: Date.now },
