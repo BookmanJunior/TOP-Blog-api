@@ -26,6 +26,7 @@ const commentRouter = require("./routes/comment");
 const loginController = require("./routes/login");
 const cmsController = require("./routes/cms");
 const userController = require("./routes/user");
+const adminLoginController = require("./routes/adminLogin");
 
 const app = express();
 const sessionOptions = {
@@ -49,7 +50,7 @@ if (process.env.NODE_ENV === "production") {
 app.use(helmet());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "http://localhost:5174"],
     credentials: true,
   })
 );
@@ -85,7 +86,7 @@ app.use("/articles", articleRouter);
 app.use("/comments", commentRouter);
 app.use("/login", loginController);
 app.use("/sign-up", usersRouter);
-app.post("/admin/login", loginMiddlewares.login_cms, UserController.me);
+app.use("/admin", adminLoginController);
 app.use("/cms", authorizationController.isAdmin, cmsController);
 app.use("/me", userController);
 app.post("/auto-login", UserController.me);
