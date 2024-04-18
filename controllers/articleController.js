@@ -20,17 +20,6 @@ const articleSortOption = {
 
 const articleAuthorOptions = { path: "author", select: "username" };
 
-// const articleValidation = [
-//   body("title", "Title can't be blank").trim().isLength({ min: 1 }),
-//   body("content", "Article content can't be blank").trim().isLength({ min: 1 }),
-//   body("cover", "Article cover can't be empty")
-//     .trim()
-//     .isURL()
-//     .withMessage("Invalid cover Url"),
-//   body("featured").trim().optional({ checkFalsy: true }).isBoolean().escape(),
-//   body("published").trim().optional({ checkFalsy: true }).isBoolean().escape(),
-// ];
-
 async function getArticles() {
   try {
     const articles = await Article.find({})
@@ -91,6 +80,7 @@ exports.article_post = async function (req, res, next) {
     content: req.body.content,
     cover: req.body.cover,
     author: res.locals.currentUser,
+    category: req.body.category,
     featured: req.body.featured,
     published: req.body.published,
   });
@@ -119,6 +109,7 @@ exports.article_edit = [
       cover: req.body.cover,
       author: req.body.author,
       comments: req.body.comments,
+      category: req.body.category,
       featured: req.body.featured,
       published: req.body.published,
       date: req.body.date,
