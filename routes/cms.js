@@ -2,6 +2,7 @@ const router = require("express").Router();
 const userController = require("../controllers/userController");
 const cmsController = require("../controllers/cmsController");
 const articleController = require("../controllers/articleController");
+const categoryController = require("../controllers/categoryController");
 const { UserValidation } = require("../validators/UserValidation");
 const { ArticleValidation } = require("../validators/ArticleValidation");
 
@@ -32,5 +33,9 @@ router.post("/users", UserValidation(), userController.user_cms_post);
 router.get("/roles", cmsController.roles_get);
 
 router.get("/count", cmsController.documents_count_get);
+
+router.get("/categories", categoryController.categories_get);
+
+router.post("/categories", categoryController.categories_post);
 
 module.exports = router;
