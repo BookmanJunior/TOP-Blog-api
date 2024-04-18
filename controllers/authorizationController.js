@@ -1,3 +1,5 @@
+const unauthorizedError = { message: "Unauthorized" };
+
 exports.isAdmin = (req, res, next) => {
   const currentUser = res.locals.currentUser;
 
@@ -5,14 +7,14 @@ exports.isAdmin = (req, res, next) => {
     return next();
   }
 
-  return res.status(401).send({ message: "Unauthorized" });
+  return res.status(401).send(unauthorizedError);
 };
 
 exports.isAuthorized = async (req, res, next) => {
   const { currentUser } = res.locals;
 
   if (!currentUser) {
-    return res.status(403).send("message: Unauthorized");
+    return res.status(403).send(unauthorizedError);
   }
 
   next();
