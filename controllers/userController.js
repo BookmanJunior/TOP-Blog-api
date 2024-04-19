@@ -136,7 +136,7 @@ exports.user_delete = async (req, res, next) => {
 
 const BookmarkPopulateOptions = {
   path: "bookmarks",
-  populate: { path: "author", select: "-_id username" },
+  populate: [{ path: "author", select: "-_id username" }, { path: "category" }],
 };
 
 exports.me = async (req, res, next) => {
