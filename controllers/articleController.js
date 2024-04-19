@@ -1,5 +1,6 @@
 const Article = require("../models/Article");
 const Comment = require("../models/Comment");
+const Category = require("../models/Category");
 const { body, validationResult } = require("express-validator");
 const mongoose = require("mongoose");
 const { ErrorFormatter } = require("../helpers/ErrorFormatter");
@@ -20,6 +21,8 @@ const articleSortOption = {
 
 const articleAuthorOptions = { path: "author", select: "username" };
 
+const categoryOptions = { path: "category" };
+
 async function getArticles() {
   try {
     const articles = await Article.find({})
@@ -36,7 +39,7 @@ exports.published_articles_get = async function (req, res, next) {
   try {
     const articles = await Article.find({ published: true })
       .sort(articleSortOption)
-      .populate([articleAuthorOptions])
+      .populate([articleAuthorOptions, categoryOptions])
       .exec();
     return res.status(200).send(articles);
   } catch (error) {
@@ -47,6 +50,25 @@ exports.published_articles_get = async function (req, res, next) {
 exports.articles_get = async function (req, res, next) {
   try {
     const articles = await getArticles();
+    return res.status(200).send(articles);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.articles_by_category_get = async function (req, res, next) {
+  try {
+    const category = await Category.findOne({
+      title: req.params.categoryName,
+    }).exec();
+
+    if (!category) {
+      return res.status(404).send({ message: "Category not found" });
+    }
+
+    const articles = await Article.find({ category: category._id })
+      .sort(articleSortOption)
+      .populate([articleAuthorOptions, categoryOptions]);
     return res.status(200).send(articles);
   } catch (error) {
     return next(error);
