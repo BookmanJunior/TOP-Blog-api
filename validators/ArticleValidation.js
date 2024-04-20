@@ -7,6 +7,12 @@ exports.ArticleValidation = () => [
     .trim()
     .isURL()
     .withMessage("Article cover must be a URL"),
+  body("category", "Category can't be empty")
+    .trim()
+    .isLength({ min: 3 })
+    .bail()
+    .isCategory()
+    .escape(),
   body("featured").trim().optional({ checkFalsy: true }).isBoolean().escape(),
   body("published").trim().optional({ checkFalsy: true }).isBoolean().escape(),
 ];
