@@ -27,6 +27,7 @@ const loginController = require("./routes/login");
 const cmsController = require("./routes/cms");
 const userController = require("./routes/user");
 const adminLoginController = require("./routes/adminLogin");
+const categoryController = require("./routes/category");
 
 const app = express();
 const sessionOptions = {
@@ -84,6 +85,7 @@ app.use((req, res, next) => {
 
 app.use("/articles", articleRouter);
 app.use("/comments", commentRouter);
+app.use("/category", categoryController);
 app.use("/login", loginController);
 app.use("/sign-up", usersRouter);
 app.use("/admin", adminLoginController);
