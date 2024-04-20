@@ -1,6 +1,7 @@
 const { ExpressValidator } = require("express-validator");
 const User = require("../models/User");
 const Role = require("../models/Role");
+const Category = require("../models/Category");
 
 const CustomValidator = new ExpressValidator({
   isUsernameTaken: async (value, { req }) => {
@@ -24,6 +25,13 @@ const CustomValidator = new ExpressValidator({
 
     if (!role) {
       throw new Error("Please pick an existing role");
+    }
+  },
+  isCategory: async (value) => {
+    const category = Category.findOne({ title: value }).exec();
+
+    if (!category) {
+      throw new Error("Please pick an existing category");
     }
   },
 });
