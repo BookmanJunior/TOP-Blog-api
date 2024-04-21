@@ -36,6 +36,10 @@ router.get("/count", cmsController.documents_count_get);
 
 router.get("/categories", categoryController.categories_get);
 
+router.get("/categories/:id", categoryController.category_get);
+
 router.post("/categories", categoryController.categories_post);
+
+router.put("/categories/:id", categoryController.categories_edit);
 
 module.exports = router;
