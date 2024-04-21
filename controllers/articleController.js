@@ -82,7 +82,7 @@ exports.article_get = async function (req, res, next) {
     }
 
     const article = await Article.findById(req.params.id)
-      .populate([articleAuthorOptions, commentOptions])
+      .populate([articleAuthorOptions, commentOptions, categoryOptions])
       .exec();
 
     if (!article) {
