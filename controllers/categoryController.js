@@ -3,6 +3,11 @@ const { body, validationResult } = require("../validators/CustomValidator");
 const { ErrorFormatter } = require("../helpers/ErrorFormatter");
 const { isValidObjectId } = require("mongoose");
 
+const NOTFOUNDERROR = {
+  status: 404,
+  statusText: { message: "Category not found" },
+};
+
 exports.categories_get = async (req, res, next) => {
   try {
     const categories = await Category.find({}).exec();
@@ -14,7 +19,7 @@ exports.categories_get = async (req, res, next) => {
 
 exports.category_get = async (req, res, next) => {
   if (!isValidObjectId(req.params.id)) {
-    return res.status(404).send({ message: "Category not found" });
+    return res.status(NOTFOUNDERROR.status).send(NOTFOUNDERROR.statusText);
   }
 
   try {
@@ -59,18 +64,36 @@ exports.categories_edit = [
     .escape(),
 
   async (req, res, next) => {
-    const newCategory = new Category({ title: req.body.title });
     const errors = validationResult(req).formatWith(ErrorFormatter);
+
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(NOTFOUNDERROR.status).send(NOTFOUNDERROR.statusText);
+    }
 
     if (!errors.isEmpty()) {
       return res.status(400).send(errors.mapped());
     }
 
     try {
-      await newCategory.save();
-      return res.status(200).send(newCategory);
+      const updatedCategory = await Category.findByIdAndUpdate(req.params.id, {
+        $set: { title: req.body.title },
+      });
+      return res.status(200).send(updatedCategory);
     } catch (error) {
       next(error);
     }
   },
 ];
+
+exports.category_delete = async (req, res, next) => {
+  if (!isValidObjectId(req.params.id)) {
+    return res.status(NOTFOUNDERROR.status).send(NOTFOUNDERROR.statusText);
+  }
+
+  try {
+    await Category.findByIdAndDelete(req.params.id);
+    return next();
+  } catch (error) {
+    return next();
+  }
+};
