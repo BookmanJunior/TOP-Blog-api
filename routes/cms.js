@@ -42,4 +42,10 @@ router.post("/categories", categoryController.categories_post);
 
 router.put("/categories/:id", categoryController.categories_edit);
 
+router.delete(
+  "/categories/:id",
+  categoryController.category_delete,
+  categoryController.categories_get
+);
+
 module.exports = router;
