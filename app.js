@@ -8,6 +8,8 @@ const passport = require("passport");
 const session = require("express-session");
 const strategy = require("./Auth/Authentication");
 const helmet = require("helmet");
+const { rateLimit } = require("express-rate-limit");
+
 const User = require("./models/User");
 const UserController = require("./controllers/userController");
 const authorizationController = require("./controllers/authorizationController");
@@ -36,12 +38,18 @@ const sessionOptions = {
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: 24 * 60 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
     secure: false,
     sameSite: "strict",
   },
 };
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+});
 
 if (process.env.NODE_ENV === "production") {
   sessionOptions.cookie.secure = true;
@@ -49,6 +57,7 @@ if (process.env.NODE_ENV === "production") {
 }
 
 app.use(helmet());
+app.use(limiter);
 app.use(
   cors({
     origin: ["http://localhost:5173", "http://localhost:5174"],
