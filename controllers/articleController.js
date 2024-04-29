@@ -145,7 +145,8 @@ exports.article_edit = [
     try {
       const updatedArticle = await Article.findByIdAndUpdate(
         req.params.id,
-        editedArticle
+        editedArticle,
+        { new: true }
       );
 
       return res.status(200).send(updatedArticle);
