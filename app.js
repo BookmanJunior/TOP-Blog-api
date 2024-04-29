@@ -32,6 +32,7 @@ const adminLoginController = require("./routes/adminLogin");
 const categoryController = require("./routes/category");
 
 const app = express();
+
 const sessionOptions = {
   name: "blog",
   secret: process.env.SESSION_SECRET,
@@ -40,10 +41,11 @@ const sessionOptions = {
   cookie: {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-    secure: false,
-    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
   },
 };
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 100,
@@ -52,15 +54,19 @@ const limiter = rateLimit({
 });
 
 if (process.env.NODE_ENV === "production") {
-  sessionOptions.cookie.secure = true;
-  sessionOptions.cookie.sameSite = "none";
+  app.use(limiter);
+  // required for third party cookie to work because of fly.io using proxy
+  app.set("trust proxy", 1);
 }
-
 app.use(helmet());
-app.use(limiter);
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://top-blog-opal.vercel.app",
+      "https://top-blog-cms.vercel.app",
+    ],
     credentials: true,
   })
 );
