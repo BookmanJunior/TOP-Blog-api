@@ -20,6 +20,7 @@ app.put(
   ArticleValidation(),
   articleController.article_checkbox_update
 );
+app.delete("/article/:id", articleController.article_delete);
 
 describe("Article post tests", () => {
   const mockArticle = {
@@ -108,5 +109,29 @@ describe("Article edit test", () => {
       `/article/${firstArticleResponse._body._id}`
     );
     expect(getUpdatedFirstArticle._body).toHaveProperty("featured", true);
+  });
+});
+
+describe("Test article delete middleware", () => {
+  beforeAll(MongoMemory.initializeMongoServer);
+  afterAll(MongoMemory.closeMongoServer);
+
+  const mockArticle = {
+    title: "Test article",
+    content: "The content goes here",
+    cover: "https://media.graphassets.com/fbC623WSCiSdF9djpWQo",
+    comments: [],
+    category: "6621205cbc0ae006099a1d05",
+    featured: false,
+    published: true,
+  };
+
+  it("Delete article successfully", async () => {
+    const postRes = await request(app)
+      .post("/article")
+      .type("form")
+      .send(mockArticle);
+    const delRes = await request(app).delete(`/article/${postRes._body._id}`);
+    expect(delRes._body.length).toBe(0);
   });
 });
