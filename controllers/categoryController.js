@@ -35,7 +35,7 @@ exports.categories_post = [
     .trim()
     .isLength({ min: 3 })
     .bail()
-    .isCategory()
+    .isDuplicateCategory()
     .escape(),
 
   async (req, res, next) => {
