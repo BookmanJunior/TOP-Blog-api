@@ -34,6 +34,21 @@ const CustomValidator = new ExpressValidator({
       throw new Error("Please pick an existing category");
     }
   },
+
+  isDuplicateCategory: async (value) => {
+    const category = await Category.findOne({ title: value })
+      .collation({
+        locale: "en",
+        strength: 2,
+      })
+      .exec();
+
+    if (category) {
+      throw new Error(
+        `${value} category already exists. Enter a different category title`
+      );
+    }
+  },
 });
 
 module.exports = CustomValidator;
