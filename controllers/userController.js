@@ -1,4 +1,3 @@
-const { ExpressValidator } = require("express-validator");
 const User = require("../models/User");
 const Role = require("../models/Role");
 const Comment = require("../models/Comment");
