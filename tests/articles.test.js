@@ -15,6 +15,11 @@ app.use((req, res, next) => {
 app.get("/article/:id", articleController.article_get);
 app.post("/article", ArticleValidation(), articleController.article_post);
 app.put("/article/:id", ArticleValidation(), articleController.article_edit);
+app.put(
+  "/article/checkbox/:id",
+  ArticleValidation(),
+  articleController.article_checkbox_update
+);
 
 describe("Article post tests", () => {
   const mockArticle = {
@@ -54,6 +59,16 @@ describe("Article edit test", () => {
     published: true,
   };
 
+  const anotherMockArticle = {
+    title: "Another Test article",
+    content: "Content goes here",
+    cover: "https://media.graphassets.com/fbC623WSCiSdF9djpWQo",
+    comments: [],
+    category: "6621205cbc0ae006099a1d05",
+    featured: true,
+    published: true,
+  };
+
   const mockArticleChanged = {
     ...mockArticle,
     title: "New title",
@@ -74,5 +89,24 @@ describe("Article edit test", () => {
       .type("form")
       .send(mockArticleChanged);
     expect(response._body).toHaveProperty("title", mockArticleChanged.title);
+  });
+
+  it("Only one article can be featured at a time", async () => {
+    const firstArticleResponse = await request(app)
+      .post("/article")
+      .type("form")
+      .send(mockArticle);
+    const secondArticleResponse = await request(app)
+      .post("/article")
+      .type("form")
+      .send(anotherMockArticle);
+    const updateFirstArticle = await request(app)
+      .put(`/article/checkbox/${firstArticleResponse._body._id}`)
+      .type("form")
+      .send({ ...mockArticle, featured: true });
+    const getUpdatedFirstArticle = await request(app).get(
+      `/article/${firstArticleResponse._body._id}`
+    );
+    expect(getUpdatedFirstArticle._body).toHaveProperty("featured", true);
   });
 });
