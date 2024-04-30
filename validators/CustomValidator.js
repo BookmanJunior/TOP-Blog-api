@@ -21,14 +21,14 @@ const CustomValidator = new ExpressValidator({
     }
   },
   isRole: async (value) => {
-    const role = Role.findOne({ role: value }).exec();
+    const role = await Role.findOne({ role: value }).exec();
 
     if (!role) {
       throw new Error("Please pick an existing role");
     }
   },
   isCategory: async (value) => {
-    const category = Category.findOne({ title: value }).exec();
+    const category = await Category.findOne({ title: value }).exec();
 
     if (!category) {
       throw new Error("Please pick an existing category");
