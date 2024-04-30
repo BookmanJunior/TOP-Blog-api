@@ -17,6 +17,5 @@ exports.UserValidation = () => [
     .bail()
     .isLength({ min: 8 })
     .escape(),
-  body("role").trim().isRole().escape(),
   body("name.*").optional({ checkFalsy: true }).trim().escape(),
 ];
