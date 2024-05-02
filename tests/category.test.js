@@ -53,13 +53,14 @@ describe("Category delete middleware tests", () => {
   beforeAll(MongoServer.initializeMongoServer);
   afterAll(MongoServer.closeMongoServer);
 
-  it("Delete category and return empty category list", async () => {
+  it("Delete category and return category list with 1 item", async () => {
     const res = await request(app)
       .post("/category")
       .type("form")
       .send({ title: "test" });
     const deleteRes = await request(app).delete(`/category/${res._body._id}`);
-    expect(deleteRes._body.length).toBe(0);
+    // account for a category being created on initial server run
+    expect(deleteRes._body.length).toBe(1);
   });
 
   it("Return not found error", async () => {
