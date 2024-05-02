@@ -12,6 +12,11 @@ app.use((req, res, next) => {
 });
 
 app.post("/category", categoryController.categories_post);
+app.delete(
+  "/category/:id",
+  categoryController.category_delete,
+  categoryController.categories_get
+);
 
 describe("Category post route tests", () => {
   beforeAll(MongoServer.initializeMongoServer);
@@ -40,5 +45,20 @@ describe("Category post route tests", () => {
       .type("form")
       .send({ title: "Test" });
     expect(400);
+  });
+});
+
+describe("Category delete middleware tests", () => {
+  beforeAll(MongoServer.initializeMongoServer);
+  afterAll(MongoServer.closeMongoServer);
+
+  it("Delete category and return empty category list", async () => {
+    const res = await request(app)
+      .post("/category")
+      .type("form")
+      .send({ title: "test" });
+    expect(res._body).toHaveProperty("title", "test");
+    const deleteRes = await request(app).delete(`/category/${res._body._id}`);
+    expect(deleteRes._body.length).toBe(0);
   });
 });
