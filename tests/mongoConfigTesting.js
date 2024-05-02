@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const { MongoMemoryReplSet } = require("mongodb-memory-server");
+const Category = require("../models/Category");
+const { mockCategoryID } = require("./mockCategoryId");
 
 let mongoServer;
 
@@ -10,6 +12,10 @@ exports.initializeMongoServer = async () => {
   const mongoUri = mongoServer.getUri();
 
   await mongoose.connect(mongoUri);
+  await new Category({
+    title: "mock category",
+    _id: mockCategoryID,
+  }).save();
 
   mongoose.connection.on("error", (e) => {
     if (e.message.code === "ETIMEDOUT") {
