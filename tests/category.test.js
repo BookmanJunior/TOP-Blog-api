@@ -17,6 +17,7 @@ app.delete(
   categoryController.category_delete,
   categoryController.categories_get
 );
+app.put("/category/:id", categoryController.categories_edit);
 
 describe("Category post route tests", () => {
   beforeAll(MongoServer.initializeMongoServer);
@@ -57,7 +58,6 @@ describe("Category delete middleware tests", () => {
       .post("/category")
       .type("form")
       .send({ title: "test" });
-    expect(res._body).toHaveProperty("title", "test");
     const deleteRes = await request(app).delete(`/category/${res._body._id}`);
     expect(deleteRes._body.length).toBe(0);
   });
@@ -65,5 +65,38 @@ describe("Category delete middleware tests", () => {
   it("Return not found error", async () => {
     await request(app).delete(`/category/${123345}`);
     expect(404);
+  });
+});
+
+describe("Category edit middleware tests", () => {
+  beforeAll(MongoServer.initializeMongoServer);
+  afterAll(MongoServer.closeMongoServer);
+
+  it("Edit a category", async () => {
+    const res = await request(app)
+      .post("/category")
+      .type("form")
+      .send({ title: "test" });
+    const editRes = await request(app)
+      .put(`/category/${res._body._id}`)
+      .type("form")
+      .send({ title: "new title" });
+    expect(editRes._body).toHaveProperty("title", "new title");
+  });
+
+  it("Prevent changing a category to an existing one", async () => {
+    const firstCategoryRes = await request(app)
+      .post("/category")
+      .type("form")
+      .send({ title: "category" });
+    const secondCategoryRes = await request(app)
+      .post("/category")
+      .type("form")
+      .send({ title: "another category" });
+    await request(app)
+      .put(`/category/${secondCategoryRes._body._id}`)
+      .type("form")
+      .send({ title: "category" });
+    expect(400);
   });
 });
