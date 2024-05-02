@@ -60,7 +60,7 @@ exports.categories_edit = [
     .trim()
     .isLength({ min: 3 })
     .bail()
-    .isCategory()
+    .isDuplicateCategory()
     .escape(),
 
   async (req, res, next) => {
@@ -75,9 +75,13 @@ exports.categories_edit = [
     }
 
     try {
-      const updatedCategory = await Category.findByIdAndUpdate(req.params.id, {
-        $set: { title: req.body.title },
-      });
+      const updatedCategory = await Category.findByIdAndUpdate(
+        req.params.id,
+        {
+          $set: { title: req.body.title },
+        },
+        { new: true }
+      );
       return res.status(200).send(updatedCategory);
     } catch (error) {
       next(error);
