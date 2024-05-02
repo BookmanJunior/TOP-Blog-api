@@ -28,7 +28,7 @@ const CustomValidator = new ExpressValidator({
     }
   },
   isCategory: async (value) => {
-    const category = await Category.findOne({ title: value }).exec();
+    const category = await Category.findById(value).exec();
 
     if (!category) {
       throw new Error("Please pick an existing category");
