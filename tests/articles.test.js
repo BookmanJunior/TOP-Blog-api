@@ -1,5 +1,6 @@
 const articleController = require("../controllers/articleController");
 const { ArticleValidation } = require("../validators/ArticleValidation");
+const { mockCategoryID } = require("./mockCategoryId");
 
 const express = require("express");
 const request = require("supertest");
@@ -28,7 +29,7 @@ describe("Article post tests", () => {
     content: "The content goes here",
     cover: "https://media.graphassets.com/fbC623WSCiSdF9djpWQo",
     comments: [],
-    category: "6621205cbc0ae006099a1d05",
+    category: mockCategoryID,
     featured: false,
     published: true,
   };
@@ -55,7 +56,7 @@ describe("Article edit test", () => {
     content: "The content goes here",
     cover: "https://media.graphassets.com/fbC623WSCiSdF9djpWQo",
     comments: [],
-    category: "6621205cbc0ae006099a1d05",
+    category: mockCategoryID,
     featured: false,
     published: true,
   };
@@ -65,7 +66,7 @@ describe("Article edit test", () => {
     content: "Content goes here",
     cover: "https://media.graphassets.com/fbC623WSCiSdF9djpWQo",
     comments: [],
-    category: "6621205cbc0ae006099a1d05",
+    category: mockCategoryID,
     featured: true,
     published: true,
   };
@@ -121,7 +122,7 @@ describe("Test article delete middleware", () => {
     content: "The content goes here",
     cover: "https://media.graphassets.com/fbC623WSCiSdF9djpWQo",
     comments: [],
-    category: "6621205cbc0ae006099a1d05",
+    category: mockCategoryID,
     featured: false,
     published: true,
   };
