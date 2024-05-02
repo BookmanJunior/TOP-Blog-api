@@ -61,4 +61,9 @@ describe("Category delete middleware tests", () => {
     const deleteRes = await request(app).delete(`/category/${res._body._id}`);
     expect(deleteRes._body.length).toBe(0);
   });
+
+  it("Return not found error", async () => {
+    await request(app).delete(`/category/${123345}`);
+    expect(404);
+  });
 });
